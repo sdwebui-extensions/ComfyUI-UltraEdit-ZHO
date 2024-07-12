@@ -2,13 +2,17 @@ import torch
 import os
 import folder_paths
 from transformers import CLIPTextModelWithProjection, CLIPTokenizer, T5EncoderModel, T5TokenizerFast
-from diffusers import StableDiffusion3InstructPix2PixPipeline, AutoencoderKL, FlowMatchEulerDiscreteScheduler, SD3Transformer2DModel
+from .ultra_edit_diffusers import StableDiffusion3InstructPix2PixPipeline, AutoencoderKL, FlowMatchEulerDiscreteScheduler, SD3Transformer2DModel
 import numpy as np
 from PIL import Image
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-folder_paths.folder_names_and_paths["ultraedit"] = ([os.path.join(folder_paths.models_dir, "ultraedit")], folder_paths.supported_pt_extensions)
+ultraedit_folders = [os.path.join(folder_paths.models_dir, "ultraedit")]
+if os.path.exists('/stable-diffusion-cache/models/ultraedit'):
+    ultraedit_folders.append('/stable-diffusion-cache/models/ultraedit')
+                     
+folder_paths.folder_names_and_paths["ultraedit"] = (ultraedit_folders, folder_paths.supported_pt_extensions)
 
 
 def tensor2pil(image):
@@ -81,36 +85,39 @@ class UltraEdit_ModelLoader_local_Zho:
         print(ultraedit_path)
 
         # 获取当前工作目录
-        current_dir = os.path.dirname(os.path.abspath(__file__))
+        model_folder_dir = folder_paths.models_dir
+        if not os.path.exists(os.path.join(model_folder_dir, "ultraedit/text_encoder")):
+            if os.path.exists('/stable-diffusion-cache/models/ultraedit'):
+                model_folder_dir = '/stable-diffusion-cache/models'
 
         # 绝对路径加载 text_encoder
-        text_encoder_path = os.path.join(current_dir, "../../models/ultraedit/text_encoder")
-        text_encoder_2_path = os.path.join(current_dir, "../../models/ultraedit/text_encoder_2")
-        text_encoder_3_path = os.path.join(current_dir, "../../models/ultraedit/text_encoder_3")
+        text_encoder_path = os.path.join(model_folder_dir, "ultraedit/text_encoder")
+        text_encoder_2_path = os.path.join(model_folder_dir, "ultraedit/text_encoder_2")
+        text_encoder_3_path = os.path.join(model_folder_dir, "ultraedit/text_encoder_3")
 
         text_encoder = CLIPTextModelWithProjection.from_pretrained(text_encoder_path)
         text_encoder_2 = CLIPTextModelWithProjection.from_pretrained(text_encoder_2_path)
         text_encoder_3 = T5EncoderModel.from_pretrained(text_encoder_3_path)
 
         # 绝对路径加载 vae
-        vae_path = os.path.join(current_dir, "../../models/ultraedit/vae")
+        vae_path = os.path.join(model_folder_dir, "ultraedit/vae")
         vae = AutoencoderKL.from_pretrained(vae_path)
         
         # 绝对路径加载 transformer
-        transformer_path = os.path.join(current_dir, "../../models/ultraedit/transformer")
+        transformer_path = os.path.join(model_folder_dir, "ultraedit/transformer")
         transformer = SD3Transformer2DModel.from_pretrained(transformer_path)
 
         # 绝对路径加载 tokenizer
-        tokenizer_path = os.path.join(current_dir, "../../models/ultraedit/tokenizer")
-        tokenizer_2_path = os.path.join(current_dir, "../../models/ultraedit/tokenizer_2")
-        tokenizer_3_path = os.path.join(current_dir, "../../models/ultraedit/tokenizer_3")
+        tokenizer_path = os.path.join(model_folder_dir, "ultraedit/tokenizer")
+        tokenizer_2_path = os.path.join(model_folder_dir, "ultraedit/tokenizer_2")
+        tokenizer_3_path = os.path.join(model_folder_dir, "ultraedit/tokenizer_3")
 
         tokenizer = CLIPTokenizer.from_pretrained(tokenizer_path)
         tokenizer_2 = CLIPTokenizer.from_pretrained(tokenizer_2_path)
         tokenizer_3 = T5TokenizerFast.from_pretrained(tokenizer_3_path)
 
         # 绝对路径加载 scheduler
-        scheduler_path = os.path.join(current_dir, "../../models/ultraedit/scheduler")
+        scheduler_path = os.path.join(model_folder_dir, "ultraedit/scheduler")
         scheduler = FlowMatchEulerDiscreteScheduler.from_pretrained(scheduler_path)
 
         
