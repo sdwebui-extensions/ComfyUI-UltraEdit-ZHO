@@ -1,8 +1,11 @@
+import sys
 import torch
 import os
+script_directory = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(script_directory)
 import folder_paths
 from transformers import CLIPTextModelWithProjection, CLIPTokenizer, T5EncoderModel, T5TokenizerFast
-from .ultra_edit_diffusers import StableDiffusion3InstructPix2PixPipeline, AutoencoderKL, FlowMatchEulerDiscreteScheduler, SD3Transformer2DModel
+from ultra_edit_diffusers import StableDiffusion3InstructPix2PixPipeline, AutoencoderKL, FlowMatchEulerDiscreteScheduler, SD3Transformer2DModel
 import numpy as np
 from PIL import Image
 
